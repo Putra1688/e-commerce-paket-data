@@ -5,12 +5,13 @@ import PackageCard from '../components/PackageCard';
 import TransactionForm from '../components/TransactionForm';
 import '../index.css';
 import { useAuth } from '../components/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 
 const PackageListPage = () => {
   const { isLoggedIn, user } = useAuth();
   const { data: packages, loading, error, refetch } = useApi('dataPackages');
   const [selectedPackage, setSelectedPackage] = useState(null);
+  const navigate = useNavigate();
 
   // Proteksi Route
   // if (!isLoggedIn) {
@@ -99,7 +100,7 @@ const PackageListPage = () => {
                 Login terlebih dahulu untuk melakukan pembelian paket internet
               </p>
               <button
-                onClick={() => window.location.href = '/login'}
+                onClick={() => navigate('/login')}
                 className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-blue-500/25"
               >
                 Login Sekarang
