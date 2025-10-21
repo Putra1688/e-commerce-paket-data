@@ -1,0 +1,136 @@
+{
+  "customers": [
+    {
+      "id": "1",
+      "username": "budi",
+      "name": "Budi Santoso",
+      "phone": "08123456789",
+      "balance": 50000
+    }
+  ],
+  "dataPackages": [
+    {
+      "id": "101",
+      "name": "Paket Harian 1GB",
+      "provider": "Telkomsel",
+      "price": 10000
+    },
+    {
+      "id": "102",
+      "name": "Paket Bulanan 50GB",
+      "provider": "XL",
+      "price": 100000
+    },
+    {
+      "id": 103,
+      "name": "Combo Super Cepat",
+      "provider": "Indosat",
+      "price": 75000
+    },
+    {
+      "id": 104,
+      "name": "Malam Unlimited",
+      "provider": "Axis",
+      "price": 35000
+    }
+  ],
+  "transactions": [
+    {
+      "id": "1",
+      "customerId": 1,
+      "packageId": 101,
+      "date": "2025-10-21",
+      "status": "Success"
+    },
+    {
+      "id": "bba5",
+      "customerId": "1",
+      "packageId": "102",
+      "packageName": "Paket Bulanan 50GB",
+      "amount": 100000,
+      "phone": "08123456789",
+      "date": "2025-10-21T03:12:37.853Z",
+      "status": "Completed"
+    },
+    {
+      "id": "0017",
+      "customerId": "1",
+      "packageId": "102",
+      "packageName": "Paket Bulanan 50GB",
+      "amount": 100000,
+      "phone": "08123456789",
+      "date": "2025-10-21T03:12:39.673Z",
+      "status": "Completed"
+    },
+    {
+      "id": "0d7e",
+      "customerId": "1",
+      "packageId": "102",
+      "packageName": "Paket Bulanan 50GB",
+      "amount": 100000,
+      "phone": "08123456789",
+      "date": "2025-10-21T03:12:41.532Z",
+      "status": "Completed"
+    },
+    {
+      "id": "672c",
+      "customerId": "1",
+      "packageId": "101",
+      "packageName": "Paket Harian 1GB",
+      "amount": 10000,
+      "phone": "08123456789",
+      "date": "2025-10-21T03:12:50.058Z",
+      "status": "Completed"
+    },
+    {
+      "id": "8369",
+      "customerId": "1",
+      "packageId": "101",
+      "packageName": "Paket Harian 1GB",
+      "amount": 10000,
+      "phone": "08123456789",
+      "date": "2025-10-21T03:12:51.106Z",
+      "status": "Completed"
+    },
+    {
+      "id": "c292",
+      "customerId": "1",
+      "packageId": "102",
+      "packageName": "Paket Bulanan 50GB",
+      "amount": 100000,
+      "phone": "08123456789",
+      "date": "2025-10-21T14:44:29.662Z",
+      "status": "Completed"
+    },
+    {
+      "id": "5386",
+      "customerId": "1",
+      "packageId": "101",
+      "packageName": "Paket Harian 1GB",
+      "amount": 10000,
+      "phone": "08123456789",
+      "date": "2025-10-21T14:44:45.458Z",
+      "status": "Completed"
+    },
+    {
+      "id": "e501",
+      "customerId": "1",
+      "packageId": "101",
+      "packageName": "Paket Harian 1GB",
+      "amount": 10000,
+      "phone": "083153248283",
+      "date": "2025-10-21T14:51:11.893Z",
+      "status": "Completed"
+    },
+    {
+      "id": "5bf1",
+      "customerId": "1",
+      "packageId": "101",
+      "packageName": "Paket Harian 1GB",
+      "amount": 10000,
+      "phone": "083153248283",
+      "date": "2025-10-21T14:51:16.680Z",
+      "status": "Completed"
+    }
+  ]
+}
