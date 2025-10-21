@@ -13,6 +13,8 @@ const LoginForm = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
 
+  const API_BASE_URL = 'https://my-json-server.typicode.com/Putra1688/e-commerce-paket-data';
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -20,7 +22,7 @@ const LoginForm = () => {
 
     try {
       // Cek User dari db.json
-      const response = await axios.get(`http://localhost:3000/customers?username=${username}`);
+      const response = await axios.get(`${API_BASE_URL}/customers?username=${username}`);
       
       if (response.data.length === 1) {
         // User ditemukan. Login sukses
@@ -61,7 +63,7 @@ const LoginForm = () => {
               {error && (
                 <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-lg animate-pulse">
                   <div className="flex items-center">
-                    <div className="flex-shrink-0">
+                    <div className="shrink-0">
                       <svg className="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
                       </svg>
