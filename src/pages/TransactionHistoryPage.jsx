@@ -1,12 +1,47 @@
-
 import React, { useMemo } from 'react';
 import useApi from '../hooks/useApi';
 import { useAuth } from '../components/AuthContext';
 import { Navigate } from 'react-router-dom';
-import '../index.css';
+import {
+  Container,
+  Paper,
+  Typography,
+  Box,
+  Grid,
+  Card,
+  CardContent,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Chip,
+  Button,
+  CircularProgress,
+  Alert,
+  useTheme,
+  useMediaQuery,
+  Fade,
+  Divider,
+  Avatar,
+  IconButton
+} from '@mui/material';
+import {
+  Receipt,
+  CheckCircle,
+  Schedule,
+  Error,
+  FilterList,
+  GetApp,
+  Add,
+  History as HistoryIcon
+} from '@mui/icons-material';
 
 const TransactionHistoryPage = () => {
   const { isLoggedIn, user } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
   // Ambil transaksi hanya untuk customer yang login
   const endpoint = `transactions?customerId=${user?.id || ''}&_sort=date&_order=desc`;
@@ -17,244 +52,441 @@ const TransactionHistoryPage = () => {
     return <Navigate to="/login" replace />;
   }
 
-  if (loading) return <div className="page-content">Memuat riwayat transaksi...</div>;
-  if (error) return <div className="page-content error-message">{error}</div>;
+  // Calculate stats
+  const stats = useMemo(() => {
+    if (!transactions) return { total: 0, success: 0, pending: 0 };
+    
+    return {
+      total: transactions.length,
+      success: transactions.filter(t => t.status?.toLowerCase() === 'success').length,
+      pending: transactions.filter(t => t.status?.toLowerCase() === 'pending').length
+    };
+  }, [transactions]);
+
+  const getStatusChip = (status) => {
+    const statusLower = status?.toLowerCase();
+    
+    switch (statusLower) {
+      case 'success':
+        return (
+          <Chip
+            icon={<CheckCircle />}
+            label="Berhasil"
+            color="success"
+            variant="outlined"
+            size="small"
+          />
+        );
+      case 'pending':
+        return (
+          <Chip
+            icon={<Schedule />}
+            label="Pending"
+            color="warning"
+            variant="outlined"
+            size="small"
+          />
+        );
+      case 'failed':
+        return (
+          <Chip
+            icon={<Error />}
+            label="Gagal"
+            color="error"
+            variant="outlined"
+            size="small"
+          />
+        );
+      default:
+        return (
+          <Chip
+            label="Pending"
+            color="default"
+            variant="outlined"
+            size="small"
+          />
+        );
+    }
+  };
+
+  if (loading) {
+    return (
+      <Container sx={{ py: 4, textAlign: 'center' }}>
+        <CircularProgress />
+        <Typography variant="h6" sx={{ mt: 2 }}>
+          Memuat riwayat transaksi...
+        </Typography>
+      </Container>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container sx={{ py: 4 }}>
+        <Alert severity="error">{error}</Alert>
+      </Container>
+    );
+  }
 
   return (
-  <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8 px-4 sm:px-6 lg:px-8">
-    <div className="max-w-7xl mx-auto">
-      {/* Header Section */}
-      <div className="mb-8 text-center">
-        <h2 className="text-3xl font-bold text-gray-900 mb-3">Riwayat Transaksi Pembelian</h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          Lihat semua riwayat pembelian paket internet Anda dalam satu tempat
-        </p>
-      </div>
+    <Container 
+      maxWidth="xl" 
+      sx={{ 
+        py: 4,
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f5f5 0%, #e3f2fd 50%, #f3e5f5 100%)'
+      }}
+    >
+      <Fade in timeout={800}>
+        <Box>
+          {/* Header Section */}
+          <Box textAlign="center" mb={6}>
+            <Typography 
+              variant="h3" 
+              component="h1" 
+              gutterBottom 
+              fontWeight="bold"
+              color="text.primary"
+            >
+              Riwayat Transaksi Pembelian
+            </Typography>
+            <Typography 
+              variant="h6" 
+              color="text.secondary"
+              sx={{ maxWidth: 600, mx: 'auto' }}
+            >
+              Lihat semua riwayat pembelian paket internet Anda dalam satu tempat
+            </Typography>
+          </Box>
 
-      {/* Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-3 bg-blue-100 rounded-lg mr-4">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Total Transaksi</p>
-              <p className="text-2xl font-bold text-gray-900">{transactions?.length || 0}</p>
-            </div>
-          </div>
-        </div>
+          {/* Stats Overview */}
+          <Grid container spacing={3} sx={{ mb: 6 }}>
+            <Grid item xs={12} md={4}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+                  color: 'white'
+                }}
+              >
+                <CardContent>
+                  <Box display="flex" alignItems="center">
+                    <Avatar
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        mr: 3,
+                        width: 60,
+                        height: 60
+                      }}
+                    >
+                      <Receipt />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                        Total Transaksi
+                      </Typography>
+                      <Typography variant="h3" fontWeight="bold">
+                        {stats.total}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-3 bg-green-100 rounded-lg mr-4">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Berhasil</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {transactions?.filter(t => t.status?.toLowerCase() === 'success').length || 0}
-              </p>
-            </div>
-          </div>
-        </div>
+            <Grid item xs={12} md={4}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #2e7d32 0%, #4caf50 100%)',
+                  color: 'white'
+                }}
+              >
+                <CardContent>
+                  <Box display="flex" alignItems="center">
+                    <Avatar
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        mr: 3,
+                        width: 60,
+                        height: 60
+                      }}
+                    >
+                      <CheckCircle />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                        Berhasil
+                      </Typography>
+                      <Typography variant="h3" fontWeight="bold">
+                        {stats.success}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center">
-            <div className="p-3 bg-orange-100 rounded-lg mr-4">
-              <svg className="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-              </svg>
-            </div>
-            <div>
-              <p className="text-sm text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {transactions?.filter(t => t.status?.toLowerCase() === 'pending').length || 0}
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+            <Grid item xs={12} md={4}>
+              <Card 
+                elevation={2}
+                sx={{ 
+                  borderRadius: 3,
+                  background: 'linear-gradient(135deg, #ed6c02 0%, #ff9800 100%)',
+                  color: 'white'
+                }}
+              >
+                <CardContent>
+                  <Box display="flex" alignItems="center">
+                    <Avatar
+                      sx={{
+                        bgcolor: 'rgba(255,255,255,0.2)',
+                        mr: 3,
+                        width: 60,
+                        height: 60
+                      }}
+                    >
+                      <Schedule />
+                    </Avatar>
+                    <Box>
+                      <Typography variant="body2" sx={{ opacity: 0.9 }}>
+                        Pending
+                      </Typography>
+                      <Typography variant="h3" fontWeight="bold">
+                        {stats.pending}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </CardContent>
+              </Card>
+            </Grid>
+          </Grid>
 
-      {transactions && transactions.length > 0 ? (
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          {/* Table Header with Actions */}
-          <div className="px-6 py-4 border-b border-gray-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <div>
-              <h3 className="text-lg font-semibold text-gray-900">Daftar Transaksi</h3>
-              <p className="text-sm text-gray-600 mt-1">
-                {transactions.length} transaksi ditemukan
-              </p>
-            </div>
-            <div className="flex gap-3">
-              <button className="px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors duration-200 flex items-center">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
-                </svg>
-                Filter
-              </button>
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors duration-200 flex items-center">
-                <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Ekspor
-              </button>
-            </div>
-          </div>
-
-          {/* Table Container */}
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    ID Transaksi
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Tanggal
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Paket
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Nomor Tujuan
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Harga
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {transactions.map((t) => (
-                  <tr 
-                    key={t.id} 
-                    className="hover:bg-gray-50 transition-colors duration-200 group"
+          {transactions && transactions.length > 0 ? (
+            <Paper
+              elevation={3}
+              sx={{
+                borderRadius: 3,
+                overflow: 'hidden'
+              }}
+            >
+              {/* Table Header with Actions */}
+              <Box
+                sx={{
+                  p: 3,
+                  borderBottom: 1,
+                  borderColor: 'divider',
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between',
+                  alignItems: isMobile ? 'stretch' : 'center',
+                  gap: 2
+                }}
+              >
+                <Box>
+                  <Typography variant="h5" component="h2" fontWeight="bold" gutterBottom={isMobile}>
+                    Daftar Transaksi
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {transactions.length} transaksi ditemukan
+                  </Typography>
+                </Box>
+                <Box display="flex" gap={1} flexDirection={isMobile ? 'column' : 'row'}>
+                  <Button
+                    startIcon={<FilterList />}
+                    variant="outlined"
+                    size={isMobile ? "large" : "medium"}
                   >
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-blue-600 font-mono group-hover:text-blue-800 transition-colors">
-                        #{t.id}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {t.date ? new Date(t.date).toLocaleDateString('id-ID', {
-                          weekday: 'short',
-                          year: 'numeric',
-                          month: 'short',
-                          day: 'numeric'
-                        }) : 'N/A'}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {t.date ? new Date(t.date).toLocaleTimeString('id-ID') : ''}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">
-                        {t.packageName || 'Paket Tidak Dikenal'}
-                      </div>
-                      <div className="text-xs text-gray-500 mt-1">
-                        {t.provider || 'Provider tidak diketahui'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900 font-mono">
-                        {t.phone || 'N/A'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-semibold text-gray-900">
-                        Rp {t.amount ? t.amount.toLocaleString('id-ID') : '0'}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
-                        t.status?.toLowerCase() === 'success' ? 'bg-green-100 text-green-800 border border-green-200' :
-                        t.status?.toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-800 border border-yellow-200' :
-                        t.status?.toLowerCase() === 'failed' ? 'bg-red-100 text-red-800 border border-red-200' :
-                        'bg-gray-100 text-gray-800 border border-gray-200'
-                      }`}>
-                        {t.status?.toLowerCase() === 'success' && (
-                          <>
-                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                            Berhasil
-                          </>
-                        )}
-                        {t.status?.toLowerCase() === 'pending' && (
-                          <>
-                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clipRule="evenodd" />
-                            </svg>
-                            Pending
-                          </>
-                        )}
-                        {t.status?.toLowerCase() === 'failed' && (
-                          <>
-                            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-                            </svg>
-                            Gagal
-                          </>
-                        )}
-                        {!t.status && 'Pending'}
-                      </span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    Filter
+                  </Button>
+                  <Button
+                    startIcon={<GetApp />}
+                    variant="contained"
+                    size={isMobile ? "large" : "medium"}
+                    sx={{
+                      background: 'linear-gradient(135deg, #1976d2 0%, #7b1fa2 100%)',
+                      '&:hover': {
+                        background: 'linear-gradient(135deg, #1565c0 0%, #6a1b9a 100%)'
+                      }
+                    }}
+                  >
+                    Ekspor
+                  </Button>
+                </Box>
+              </Box>
 
-          {/* Table Footer */}
-          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-              <p className="text-sm text-gray-600">
-                Menampilkan <span className="font-semibold">{transactions.length}</span> transaksi
-              </p>
-              <div className="flex gap-2">
-                <button className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-100 transition-colors">
-                  Sebelumnya
-                </button>
-                <button className="px-3 py-1 border border-gray-300 rounded text-sm text-gray-600 hover:bg-gray-100 transition-colors">
-                  Selanjutnya
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      ) : (
-        /* Empty State */
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
-          <div className="max-w-md mx-auto">
-            <div className="w-24 h-24 mx-auto mb-6 bg-gray-100 rounded-full flex items-center justify-center">
-              <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-              </svg>
-            </div>
-            <h3 className="text-xl font-semibold text-gray-900 mb-2">Belum ada riwayat transaksi</h3>
-            <p className="text-gray-600 mb-6">
-              Transaksi pembelian paket internet Anda akan muncul di sini. Mulai beli paket pertama Anda!
-            </p>
-            <button className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors duration-200 inline-flex items-center">
-              <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-              </svg>
-              Beli Paket Pertama
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  </div>
-);
+              {/* Table Container */}
+              <TableContainer>
+                <Table>
+                  <TableHead sx={{ bgcolor: 'grey.50' }}>
+                    <TableRow>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                        ID Transaksi
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                        Tanggal
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                        Paket
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                        Nomor Tujuan
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                        Harga
+                      </TableCell>
+                      <TableCell sx={{ fontWeight: 'bold', color: 'text.secondary' }}>
+                        Status
+                      </TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {transactions.map((transaction) => (
+                      <TableRow
+                        key={transaction.id}
+                        sx={{
+                          '&:hover': {
+                            backgroundColor: 'grey.50'
+                          },
+                          transition: 'background-color 0.2s'
+                        }}
+                      >
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              fontFamily: 'monospace',
+                              color: 'primary.main',
+                              fontWeight: 'medium'
+                            }}
+                          >
+                            #{transaction.id}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight="medium">
+                            {transaction.date ? new Date(transaction.date).toLocaleDateString('id-ID', {
+                              weekday: 'short',
+                              year: 'numeric',
+                              month: 'short',
+                              day: 'numeric'
+                            }) : 'N/A'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {transaction.date ? new Date(transaction.date).toLocaleTimeString('id-ID') : ''}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight="medium">
+                            {transaction.packageName || 'Paket Tidak Dikenal'}
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            {transaction.provider || 'Provider tidak diketahui'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography
+                            variant="body2"
+                            sx={{ fontFamily: 'monospace' }}
+                          >
+                            {transaction.phone || 'N/A'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          <Typography variant="body2" fontWeight="bold">
+                            Rp {transaction.amount ? transaction.amount.toLocaleString('id-ID') : '0'}
+                          </Typography>
+                        </TableCell>
+                        <TableCell>
+                          {getStatusChip(transaction.status)}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+
+              {/* Table Footer */}
+              <Box
+                sx={{
+                  p: 2,
+                  borderTop: 1,
+                  borderColor: 'divider',
+                  bgcolor: 'grey.50',
+                  display: 'flex',
+                  flexDirection: isMobile ? 'column' : 'row',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 2
+                }}
+              >
+                <Typography variant="body2" color="text.secondary">
+                  Menampilkan <Typography component="span" fontWeight="bold">{transactions.length}</Typography> transaksi
+                </Typography>
+                <Box display="flex" gap={1}>
+                  <Button variant="outlined" size="small">
+                    Sebelumnya
+                  </Button>
+                  <Button variant="outlined" size="small">
+                    Selanjutnya
+                  </Button>
+                </Box>
+              </Box>
+            </Paper>
+          ) : (
+            /* Empty State */
+            <Paper
+              elevation={3}
+              sx={{
+                p: 8,
+                textAlign: 'center',
+                borderRadius: 3
+              }}
+            >
+              <Box sx={{ maxWidth: 400, mx: 'auto' }}>
+                <Avatar
+                  sx={{
+                    width: 80,
+                    height: 80,
+                    bgcolor: 'grey.100',
+                    color: 'grey.400',
+                    mx: 'auto',
+                    mb: 3
+                  }}
+                >
+                  <HistoryIcon sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h5" component="h3" fontWeight="bold" gutterBottom>
+                  Belum ada riwayat transaksi
+                </Typography>
+                <Typography variant="body1" color="text.secondary" paragraph>
+                  Transaksi pembelian paket internet Anda akan muncul di sini. Mulai beli paket pertama Anda!
+                </Typography>
+                <Button
+                  variant="contained"
+                  size="large"
+                  startIcon={<Add />}
+                  sx={{
+                    py: 1.5,
+                    px: 4,
+                    borderRadius: 3,
+                    background: 'linear-gradient(135deg, #1976d2 0%, #7b1fa2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #1565c0 0%, #6a1b9a 100%)'
+                    }
+                  }}
+                >
+                  Beli Paket Pertama
+                </Button>
+              </Box>
+            </Paper>
+          )}
+        </Box>
+      </Fade>
+    </Container>
+  );
 };
 
 export default TransactionHistoryPage;

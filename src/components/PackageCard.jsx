@@ -1,66 +1,196 @@
-
 import React from 'react';
-import '../index.css';
+import {
+  Card,
+  CardContent,
+  CardActions,
+  Button,
+  Typography,
+  Box,
+  Chip,
+  List,
+  ListItem,
+  ListItemIcon,
+  useTheme,
+  useMediaQuery,
+  Fade
+} from '@mui/material';
+import {
+  CheckCircle,
+  ArrowForward,
+  Bolt,
+  DataUsage,
+  Support
+} from '@mui/icons-material';
 
 const PackageCard = ({ packageData, onSelectPackage }) => {
   const { name, provider, price } = packageData;
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+
+  const features = [
+    { icon: <Bolt />, text: 'Kecepatan tinggi' },
+    { icon: <DataUsage />, text: 'Kuota besar' },
+    { icon: <Support />, text: 'Dukungan 24/7' }
+  ];
 
   return (
-  <div className="bg-white rounded-2xl shadow-lg overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-1 border border-gray-100">
-    {/* Header dengan gradient */}
-    <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-4 text-white">
-      <h3 className="text-xl font-bold truncate">{name}</h3>
-      <div className="flex items-center mt-1">
-        <span className="bg-white/20 text-xs px-2 py-1 rounded-full">{provider}</span>
-      </div>
-    </div>
-    
-    {/* Konten utama */}
-    <div className="p-5">
-      {/* Harga dengan penekanan visual */}
-      <div className="mb-4">
-        <div className="text-gray-500 text-sm">Mulai dari</div>
-        <div className="text-2xl font-bold text-gray-800">
-          Rp {price.toLocaleString('id-ID')}
-        </div>
-        <div className="text-xs text-gray-400 mt-1">Harga sudah termasuk pajak</div>
-      </div>
-      
-      {/* Fitur unggulan */}
-      <div className="mb-5 text-sm text-gray-600">
-        <div className="flex items-center mb-1">
-          <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
-          </svg>
-          <span>Kecepatan tinggi</span>
-        </div>
-        <div className="flex items-center mb-1">
-          <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
-          </svg>
-          <span>Kuota besar</span>
-        </div>
-        <div className="flex items-center">
-          <svg className="w-4 h-4 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd"></path>
-          </svg>
-          <span>Dukungan 24/7</span>
-        </div>
-      </div>
-      
-      {/* Tombol aksi */}
-      <button 
-        className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-300 flex items-center justify-center"
-        onClick={() => onSelectPackage(packageData)}
+    <Fade in timeout={800}>
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.1)',
+          border: '1px solid',
+          borderColor: 'grey.100',
+          transition: 'all 0.3s ease-in-out',
+          '&:hover': {
+            transform: 'translateY(-4px)',
+            boxShadow: '0 12px 48px rgba(0,0,0,0.15)',
+            borderColor: 'primary.light'
+          },
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column'
+        }}
       >
-        <span>Beli Sekarang</span>
-        <svg className="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path>
-        </svg>
-      </button>
-    </div>
-  </div>
-);
+        {/* Header dengan gradient */}
+        <Box
+          sx={{
+            background: 'linear-gradient(135deg, #1976d2 0%, #7b1fa2 100%)',
+            color: 'white',
+            p: 3,
+            position: 'relative',
+            overflow: 'hidden'
+          }}
+        >
+          {/* Efek dekoratif */}
+          <Box
+            sx={{
+              position: 'absolute',
+              top: -20,
+              right: -20,
+              width: 80,
+              height: 80,
+              borderRadius: '50%',
+              backgroundColor: 'rgba(255,255,255,0.1)'
+            }}
+          />
+          <Typography
+            variant="h6"
+            component="h3"
+            sx={{
+              fontWeight: 'bold',
+              mb: 1,
+              position: 'relative',
+              zIndex: 1,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              display: '-webkit-box',
+              WebkitLineClamp: 2,
+              WebkitBoxOrient: 'vertical'
+            }}
+          >
+            {name}
+          </Typography>
+          <Chip
+            label={provider}
+            size="small"
+            sx={{
+              backgroundColor: 'rgba(255,255,255,0.2)',
+              color: 'white',
+              fontWeight: 'medium',
+              fontSize: '0.75rem',
+              position: 'relative',
+              zIndex: 1
+            }}
+          />
+        </Box>
+
+        {/* Konten utama */}
+        <CardContent sx={{ p: 3, flexGrow: 1 }}>
+          {/* Harga dengan penekanan visual */}
+          <Box sx={{ mb: 3 }}>
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ fontWeight: 'medium', mb: 0.5 }}
+            >
+              Mulai dari
+            </Typography>
+            <Typography
+              variant="h4"
+              component="div"
+              sx={{
+                fontWeight: 'bold',
+                color: 'text.primary',
+                mb: 0.5
+              }}
+            >
+              Rp {price.toLocaleString('id-ID')}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontStyle: 'italic' }}
+            >
+              Harga sudah termasuk pajak
+            </Typography>
+          </Box>
+
+          {/* Fitur unggulan */}
+          <List dense sx={{ mb: 2 }}>
+            {features.map((feature, index) => (
+              <ListItem key={index} sx={{ px: 0, py: 0.5 }}>
+                <ListItemIcon sx={{ minWidth: 32 }}>
+                  <CheckCircle
+                    sx={{
+                      color: 'success.main',
+                      fontSize: '1.2rem'
+                    }}
+                  />
+                </ListItemIcon>
+                <Typography
+                  variant="body2"
+                  color="text.primary"
+                  sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                >
+                  {feature.icon}
+                  {feature.text}
+                </Typography>
+              </ListItem>
+            ))}
+          </List>
+        </CardContent>
+
+        {/* Tombol aksi */}
+        <CardActions sx={{ p: 3, pt: 0 }}>
+          <Button
+            fullWidth
+            variant="contained"
+            size="large"
+            endIcon={<ArrowForward />}
+            onClick={() => onSelectPackage(packageData)}
+            sx={{
+              py: 1.5,
+              borderRadius: 3,
+              background: 'linear-gradient(135deg, #1976d2 0%, #7b1fa2 100%)',
+              boxShadow: '0 4px 15px rgba(25, 118, 210, 0.3)',
+              fontSize: '1rem',
+              fontWeight: 'bold',
+              textTransform: 'none',
+              transition: 'all 0.3s ease',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #1565c0 0%, #6a1b9a 100%)',
+                boxShadow: '0 6px 20px rgba(25, 118, 210, 0.4)',
+                transform: 'translateY(-1px)'
+              }
+            }}
+          >
+            Beli Sekarang
+          </Button>
+        </CardActions>
+      </Card>
+    </Fade>
+  );
 };
 
 export default PackageCard;

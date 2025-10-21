@@ -1,68 +1,151 @@
-
 import React, { useState } from 'react';
 import useApi from '../hooks/useApi';
 import PackageCard from '../components/PackageCard';
 import TransactionForm from '../components/TransactionForm';
-import '../index.css';
 import { useAuth } from '../components/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import {
+  Container,
+  Grid,
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  Button,
+  CircularProgress,
+  Alert,
+  Paper,
+  alpha,
+  useTheme
+} from '@mui/material';
+import {
+  AccountBalanceWallet,
+  Lock
+} from '@mui/icons-material';
 
 const PackageListPage = () => {
   const { isLoggedIn, user } = useAuth();
   const { data: packages, loading, error, refetch } = useApi('dataPackages');
   const [selectedPackage, setSelectedPackage] = useState(null);
   const navigate = useNavigate();
-
-  // Proteksi Route
-  // if (!isLoggedIn) {
-  //   return <Navigate to="/login" replace />;
-  // }
+  const theme = useTheme();
 
   // Tampilan Loading dan Error
-  if (loading) return <div className="page-content">Memuat daftar paket...</div>;
-  if (error) return <div className="page-content error-message">{error}</div>;
+  if (loading) {
+    return (
+      <Box 
+        display="flex" 
+        justifyContent="center" 
+        alignItems="center" 
+        minHeight="60vh"
+      >
+        <Box textAlign="center">
+          <CircularProgress size={60} />
+          <Typography variant="h6" sx={{ mt: 2 }}>
+            Memuat daftar paket...
+          </Typography>
+        </Box>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Container maxWidth="md" sx={{ py: 4 }}>
+        <Alert severity="error" sx={{ borderRadius: 2 }}>
+          {error}
+        </Alert>
+      </Container>
+    );
+  }
 
   const handleSelectPackage = (pkg) => {
-    // Jika belum login, paksa ke halaman login
     if (!isLoggedIn) {
       alert("Anda harus login untuk melanjutkan pembelian!");
-      // Biasanya menggunakan useNavigate untuk redirect, tapi kita simulasikan dengan alert
-      // useNavigator('/login')
       return;
     }
     setSelectedPackage(pkg);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-7xl mx-auto">
+    <Box 
+      sx={{
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, ${alpha(theme.palette.primary.light, 0.1)}, ${alpha(theme.palette.secondary.light, 0.1)})`,
+        py: 4,
+        px: { xs: 2, sm: 3, lg: 4 }
+      }}
+    >
+      <Container maxWidth="xl">
         {/* Header Section */}
-        <div className="text-center mb-8">
-          <h2 className="text-4xl font-bold text-gray-900 mb-4">Beli Paket Data Internet</h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+        <Box textAlign="center" mb={6}>
+          <Typography 
+            variant="h3" 
+            fontWeight="bold" 
+            color="text.primary" 
+            gutterBottom
+            sx={{
+              fontSize: { xs: '2rem', md: '2.5rem', lg: '3rem' }
+            }}
+          >
+            Beli Paket Data Internet
+          </Typography>
+          <Typography 
+            variant="h6" 
+            color="text.secondary" 
+            sx={{ 
+              maxWidth: 600, 
+              mx: 'auto',
+              fontSize: { xs: '1rem', md: '1.25rem' }
+            }}
+          >
             Pilih paket internet terbaik sesuai kebutuhan Anda dengan harga terjangkau
-          </p>
-        </div>
+          </Typography>
+        </Box>
 
         {/* Balance Info - Only for logged in users */}
         {isLoggedIn && (
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-8 border border-gray-200 max-w-md mx-auto">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <div className="bg-green-100 p-3 rounded-xl mr-4">
-                  <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-sm text-gray-600">Saldo Tersedia</p>
-                  <p className="text-2xl font-bold text-gray-900">
-                    Rp {user?.balance?.toLocaleString('id-ID') || 0}
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
+          <Box 
+            display="flex" 
+            justifyContent="center" 
+            mb={4}
+          >
+            <Card 
+              sx={{ 
+                maxWidth: 400, 
+                width: '100%',
+                borderRadius: 3,
+                boxShadow: 3,
+                border: `1px solid ${theme.palette.divider}`
+              }}
+            >
+              <CardContent sx={{ p: 3 }}>
+                <Box display="flex" alignItems="center" justifyContent="space-between">
+                  <Box display="flex" alignItems="center">
+                    <Box
+                      sx={{
+                        p: 2,
+                        borderRadius: 2,
+                        backgroundColor: 'success.light',
+                        color: 'success.main',
+                        mr: 3
+                      }}
+                    >
+                      <AccountBalanceWallet fontSize="medium" />
+                    </Box>
+                    <Box>
+                      <Typography variant="body2" color="text.secondary">
+                        Saldo Tersedia
+                      </Typography>
+                      <Typography variant="h4" fontWeight="bold" color="text.primary">
+                        Rp {user?.balance?.toLocaleString('id-ID') || 0}
+                      </Typography>
+                    </Box>
+                  </Box>
+                </Box>
+              </CardContent>
+            </Card>
+          </Box>
         )}
 
         {/* Transaction Modal */}
@@ -76,40 +159,75 @@ const PackageListPage = () => {
         )}
 
         {/* Packages Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <Grid container spacing={3} justifyContent='center'>
           {packages.map((pkg) => (
-            <PackageCard
-              key={pkg.id}
-              packageData={pkg}
-              onSelectPackage={handleSelectPackage}
-            />
+            <Grid item xs={12} sm={6} md={4} lg={3} key={pkg.id}>
+              <PackageCard
+                packageData={pkg}
+                onSelectPackage={handleSelectPackage}
+              />
+            </Grid>
           ))}
-        </div>
+        </Grid>
 
         {/* Login Prompt for non-logged in users */}
         {!isLoggedIn && (
-          <div className="text-center mt-12">
-            <div className="bg-white rounded-2xl shadow-lg p-8 max-w-md mx-auto border border-gray-200">
-              <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-semibold text-gray-900 mb-2">Login untuk Membeli</h3>
-              <p className="text-gray-600 mb-4">
-                Login terlebih dahulu untuk melakukan pembelian paket internet
-              </p>
-              <button
-                onClick={() => navigate('/login')}
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium py-3 px-6 rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-lg shadow-blue-500/25"
-              >
-                Login Sekarang
-              </button>
-            </div>
-          </div>
+          <Box textAlign="center" mt={6}>
+            <Card 
+              sx={{ 
+                maxWidth: 400, 
+                mx: 'auto',
+                borderRadius: 3,
+                boxShadow: 3,
+                border: `1px solid ${theme.palette.divider}`
+              }}
+            >
+              <CardContent sx={{ p: 4 }}>
+                <Box
+                  sx={{
+                    width: 64,
+                    height: 64,
+                    backgroundColor: 'primary.light',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    mx: 'auto',
+                    mb: 3
+                  }}
+                >
+                  <Lock sx={{ fontSize: 32, color: 'primary.main' }} />
+                </Box>
+                <Typography variant="h5" fontWeight="semibold" gutterBottom>
+                  Login untuk Membeli
+                </Typography>
+                <Typography variant="body1" color="text.secondary" paragraph>
+                  Login terlebih dahulu untuk melakukan pembelian paket internet
+                </Typography>
+                <Button
+                  fullWidth
+                  variant="contained"
+                  size="large"
+                  onClick={() => navigate('/login')}
+                  sx={{
+                    py: 1.5,
+                    borderRadius: 2,
+                    fontWeight: 'medium',
+                    background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                    '&:hover': {
+                      background: `linear-gradient(135deg, ${theme.palette.primary.dark}, ${theme.palette.secondary.dark})`,
+                    },
+                    boxShadow: 3
+                  }}
+                >
+                  Login Sekarang
+                </Button>
+              </CardContent>
+            </Card>
+          </Box>
         )}
-      </div>
-    </div>
+      </Container>
+    </Box>
   );
 };
 

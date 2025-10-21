@@ -1,192 +1,384 @@
-import React, { useState } from 'react'; 
+import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
-import '../index.css';
+import {
+  AppBar,
+  Toolbar,
+  Box,
+  Button,
+  IconButton,
+  Menu,
+  MenuItem,
+  Typography,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
+  Avatar,
+  Chip,
+  useMediaQuery,
+  useTheme,
+  Divider,
+  Fade
+} from '@mui/material';
+import {
+  Menu as MenuIcon,
+  ShoppingCart,
+  History,
+  Person,
+  ExitToApp,
+  Visibility,
+  AccountCircle,
+  ExpandMore
+} from '@mui/icons-material';
 
 const Header = () => {
   const { isLoggedIn, user, logout } = useAuth();
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [profileMenuAnchor, setProfileMenuAnchor] = useState(null);
 
   const handleLogout = () => {
     logout();
     navigate('/login');
+    setProfileMenuAnchor(null);
+    setMobileMenuOpen(false);
   };
 
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const handleProfileMenuOpen = (event) => {
+    setProfileMenuAnchor(event.currentTarget);
+  };
 
-  return (
-  <header className="bg-gradient-to-r from-blue-600 to-blue-400 shadow-lg border-b border-gray-200 sticky top-0 z-50">
-    <div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center h-20">
-        {/* Logo */}
-        <div className="flex-shrink-0">
-          <Link 
-            to="/" 
-            className="text-2xl font-bold text-white hover:text-3xl transition-all duration-300 transform hover:scale-105"
+  const handleProfileMenuClose = () => {
+    setProfileMenuAnchor(null);
+  };
+
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    setMobileMenuOpen(false);
+    handleProfileMenuClose();
+  };
+
+  // Desktop Navigation Items
+  const renderDesktopMenu = () => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {isLoggedIn ? (
+        <>
+          <Button
+            component={Link}
+            to="/packages"
+            startIcon={<ShoppingCart />}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
           >
-            Giga
-          </Link>
-        </div>
+            Beli Paket
+          </Button>
 
-        {/* Navigation */}
-        <nav className="hidden md:flex items-center space-x-1">
+          <Button
+            component={Link}
+            to="/history"
+            startIcon={<History />}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
+          >
+            Riwayat
+          </Button>
+
+          <IconButton
+            onClick={handleProfileMenuOpen}
+            sx={{
+              color: 'white',
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.2)'
+              }
+            }}
+          >
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: 'primary.light',
+                fontSize: '0.875rem',
+                fontWeight: 'bold'
+              }}
+            >
+              {user?.username?.charAt(0).toUpperCase()}
+            </Avatar>
+            <ExpandMore sx={{ ml: 0.5, fontSize: 16 }} />
+          </IconButton>
+
+          <Menu
+            anchorEl={profileMenuAnchor}
+            open={Boolean(profileMenuAnchor)}
+            onClose={handleProfileMenuClose}
+            TransitionComponent={Fade}
+            PaperProps={{
+              sx: {
+                mt: 1.5,
+                minWidth: 200,
+                borderRadius: 2,
+                boxShadow: '0 8px 32px rgba(0,0,0,0.1)'
+              }
+            }}
+          >
+            <MenuItem onClick={() => handleNavigation('/profile')}>
+              <ListItemIcon>
+                <Person fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>
+                <Typography variant="body2">
+                  Halo, <strong>{user?.username}</strong>
+                </Typography>
+              </ListItemText>
+            </MenuItem>
+            <Divider />
+            <MenuItem onClick={handleLogout}>
+              <ListItemIcon>
+                <ExitToApp fontSize="small" />
+              </ListItemIcon>
+              <ListItemText>Logout</ListItemText>
+            </MenuItem>
+          </Menu>
+        </>
+      ) : (
+        <>
+          <Button
+            component={Link}
+            to="/packages"
+            startIcon={<Visibility />}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
+          >
+            Lihat Paket
+          </Button>
+
+          <Button
+            component={Link}
+            to="/login"
+            variant="contained"
+            startIcon={<AccountCircle />}
+            sx={{
+              ml: 1,
+              borderRadius: 3,
+              px: 3,
+              background: 'linear-gradient(45deg, #1565c0 30%, #7b1fa2 90%)',
+              boxShadow: '0 3px 15px rgba(33, 150, 243, 0.3)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #0d47a1 30%, #6a1b9a 90%)',
+                boxShadow: '0 5px 20px rgba(33, 150, 243, 0.4)',
+                transform: 'translateY(-1px)'
+              },
+              transition: 'all 0.3s ease'
+            }}
+          >
+            Login
+          </Button>
+        </>
+      )}
+    </Box>
+  );
+
+  // Mobile Navigation Drawer
+  const renderMobileMenu = () => (
+    <Drawer
+      anchor="right"
+      open={mobileMenuOpen}
+      onClose={handleMobileMenuToggle}
+      PaperProps={{
+        sx: {
+          width: 280,
+          borderRadius: '16px 0 0 16px'
+        }
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', color: 'primary.main' }}>
+          Menu
+        </Typography>
+        <Divider sx={{ mb: 2 }} />
+
+        <List>
           {isLoggedIn ? (
             <>
-              {/* Menu untuk user yang login */}
-              <Link 
-                to="/packages" 
-                className="relative px-4 py-2 text-gray-700 font-medium rounded-lg hover:text-blue-600 transition-all duration-300 group"
+              <ListItem
+                button
+                onClick={() => handleNavigation('/packages')}
+                sx={{ borderRadius: 2, mb: 1 }}
               >
-                Beli Paket
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
-              </Link>
-              
-              <Link 
-                to="/history" 
-                className="relative px-4 py-2 text-gray-700 font-medium rounded-lg hover:text-blue-600 transition-all duration-300 group"
+                <ListItemIcon>
+                  <ShoppingCart color="primary" />
+                </ListItemIcon>
+                <ListItemText primary="Beli Paket" />
+              </ListItem>
+
+              <ListItem
+                button
+                onClick={() => handleNavigation('/history')}
+                sx={{ borderRadius: 2, mb: 1 }}
               >
-                Riwayat
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
-              </Link>
-              
-              <Link 
-                to="/profile" 
-                className="flex items-center space-x-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-purple-50 text-blue-600 font-medium rounded-lg border border-blue-100 hover:from-blue-100 hover:to-purple-100 hover:shadow-md transition-all duration-300 group"
+                <ListItemIcon>
+                  <History color="primary" />
+                </ListItemIcon>
+                <ListItemText primary="Riwayat" />
+              </ListItem>
+
+              <ListItem
+                button
+                onClick={() => handleNavigation('/profile')}
+                sx={{
+                  borderRadius: 2,
+                  mb: 1,
+                  backgroundColor: 'primary.light',
+                  color: 'white'
+                }}
               >
-                <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                  {user?.username?.charAt(0).toUpperCase()}
-                </div>
-                <span>Halo, {user?.username}</span>
-                <svg className="w-4 h-4 transform group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </Link>
-              
-              <button 
+                <ListItemIcon>
+                  <Avatar
+                    sx={{
+                      width: 24,
+                      height: 24,
+                      bgcolor: 'white',
+                      color: 'primary.main',
+                      fontSize: '0.75rem',
+                      fontWeight: 'bold'
+                    }}
+                  >
+                    {user?.username?.charAt(0).toUpperCase()}
+                  </Avatar>
+                </ListItemIcon>
+                <ListItemText
+                  primary={
+                    <Typography variant="body2" sx={{ color: 'white' }}>
+                      Halo, {user?.username}
+                    </Typography>
+                  }
+                />
+              </ListItem>
+
+              <ListItem
+                button
                 onClick={handleLogout}
-                className="flex items-center space-x-2 px-4 py-2 text-red-600 font-medium rounded-lg border border-red-200 hover:bg-red-50 hover:shadow-md transition-all duration-300 group"
+                sx={{
+                  borderRadius: 2,
+                  color: 'error.main',
+                  border: '1px solid',
+                  borderColor: 'error.light'
+                }}
               >
-                <svg className="w-4 h-4 transform group-hover:scale-110 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                <span>Logout</span>
-              </button>
+                <ListItemIcon>
+                  <ExitToApp color="error" />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItem>
             </>
           ) : (
             <>
-              {/* Menu untuk user yang logout */}
-              <Link 
-                to="/packages" 
-                className="relative px-4 py-2 text-gray-700 font-medium rounded-lg hover:text-blue-600 transition-all duration-300 group"
+              <ListItem
+                button
+                onClick={() => handleNavigation('/packages')}
+                sx={{ borderRadius: 2, mb: 1 }}
               >
-                Lihat Paket
-                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300"></span>
-              </Link>
-              
-              <Link 
-                to="/login" 
-                className="px-6 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 shadow-md"
+                <ListItemIcon>
+                  <Visibility color="primary" />
+                </ListItemIcon>
+                <ListItemText primary="Lihat Paket" />
+              </ListItem>
+
+              <ListItem
+                button
+                onClick={() => handleNavigation('/login')}
+                sx={{
+                  borderRadius: 2,
+                  background: 'linear-gradient(45deg, #1565c0 30%, #7b1fa2 90%)',
+                  color: 'white',
+                  mt: 2
+                }}
               >
-                Login
-              </Link>
+                <ListItemIcon>
+                  <AccountCircle sx={{ color: 'white' }} />
+                </ListItemIcon>
+                <ListItemText primary="Login" />
+              </ListItem>
             </>
           )}
-        </nav>
+        </List>
+      </Box>
+    </Drawer>
+  );
 
-        {/* Mobile menu button */}
-        <div className="md:hidden">
-          <button 
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="p-2 rounded-lg text-gray-600 hover:text-blue-600 hover:bg-gray-100 transition-colors duration-200"
+  return (
+    <AppBar
+      position="sticky"
+      sx={{
+        background: 'linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)',
+        boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
+        borderBottom: '1px solid rgba(255,255,255,0.1)'
+      }}
+    >
+      <Toolbar sx={{ justifyContent: 'space-between', minHeight: '80px !important' }}>
+        {/* Logo */}
+        <Button
+          component={Link}
+          to="/"
+          sx={{
+            color: 'white',
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            textTransform: 'none',
+            '&:hover': {
+              transform: 'scale(1.05)',
+              backgroundColor: 'transparent'
+            },
+            transition: 'transform 0.3s ease'
+          }}
+        >
+          Giga
+        </Button>
+
+        {/* Desktop Navigation */}
+        {!isMobile && renderDesktopMenu()}
+
+        {/* Mobile Menu Button */}
+        {isMobile && (
+          <IconButton
+            onClick={handleMobileMenuToggle}
+            sx={{
+              color: 'white',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.1)'
+              }
+            }}
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-          </button>
-        </div>
-      </div>
+            <MenuIcon />
+          </IconButton>
+        )}
+      </Toolbar>
 
-      {/* Mobile menu */}
-      {isMobileMenuOpen && (
-        <div className="md:hidden py-4 border-t border-gray-200 bg-white">
-          <div className="flex flex-col space-y-3">
-            {isLoggedIn ? (
-              <>
-                <Link 
-                  to="/packages" 
-                  className="px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 flex items-center"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
-                  </svg>
-                  Beli Paket
-                </Link>
-                
-                <Link 
-                  to="/history" 
-                  className="px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 flex items-center"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                  </svg>
-                  Riwayat
-                </Link>
-                
-                <Link 
-                  to="/profile" 
-                  className="px-4 py-3 bg-blue-50 text-blue-600 font-medium rounded-lg border border-blue-100 transition-all duration-200 flex items-center"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <div className="w-8 h-8 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full flex items-center justify-center text-white text-sm font-bold mr-3">
-                    {user?.username?.charAt(0).toUpperCase()}
-                  </div>
-                  Halo, {user?.username}
-                </Link>
-                
-                <button 
-                  onClick={() => {
-                    handleLogout();
-                    setIsMobileMenuOpen(false);
-                  }}
-                  className="px-4 py-3 text-red-600 font-medium rounded-lg border border-red-200 hover:bg-red-50 transition-all duration-200 flex items-center"
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                  Logout
-                </button>
-              </>
-            ) : (
-              <>
-                <Link 
-                  to="/packages" 
-                  className="px-4 py-3 text-gray-700 font-medium rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-all duration-200 flex items-center"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  <svg className="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                  </svg>
-                  Lihat Paket
-                </Link>
-                
-                <Link 
-                  to="/login" 
-                  className="px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-center"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  Login
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      )}
-    </div>
-  </header>
-);
+      {/* Mobile Navigation */}
+      {renderMobileMenu()}
+    </AppBar>
+  );
 };
 
 export default Header;
